@@ -868,7 +868,7 @@ section {
 }
 
 /* =========================================================
-   ROBOTICA E PROGRAMAÇÃO
+   PROGRAMAÇÃO
    ========================================================= */
 .robo-secao {
     background: linear-gradient(135deg, rgba(10,61,98,0.05), rgba(255,217,61,0.05));
@@ -903,7 +903,7 @@ section {
 .codigo-exemplo .com { color: #6272a4; font-style: italic; }
 
 /* =========================================================
-   LIBRAS (vídeo placeholder)
+   LIBRAS (Texto Informativo)
    ========================================================= */
 .libras-container {
     background: #fff;
@@ -912,86 +912,6 @@ section {
     box-shadow: var(--sombra);
     margin-top: 30px;
     text-align: center;
-}
-
-.video-libras {
-    width: 100%;
-    max-width: 600px;
-    aspect-ratio: 16/9;
-    background: linear-gradient(135deg, var(--agua-profunda), var(--agua-media));
-    border-radius: 12px;
-    margin: 20px auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 1.2rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.video-libras::before {
-    content: '🤟';
-    font-size: 4rem;
-    opacity: 0.5;
-    position: absolute;
-}
-
-.video-libras span {
-    position: relative;
-    z-index: 1;
-    background: rgba(0,0,0,0.5);
-    padding: 10px 20px;
-    border-radius: 8px;
-}
-
-/* =========================================================
-   CRITÉRIOS DE AVALIAÇÃO
-   ========================================================= */
-.criterios {
-    background: #fff;
-    border-radius: var(--radius);
-    padding: 30px;
-    box-shadow: var(--sombra);
-    margin-top: 30px;
-}
-
-.criterio-item {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 15px;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    transition: var(--transicao);
-}
-
-.criterio-item:hover {
-    background: rgba(255,217,61,0.08);
-    transform: translateX(5px);
-}
-
-.criterio-peso {
-    min-width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, var(--sol-claro), var(--sol-escuro));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 1.2rem;
-    color: var(--agua-profunda);
-    box-shadow: 0 4px 15px rgba(247,127,0,0.3);
-}
-
-.criterio-info h4 {
-    color: var(--agua-profunda);
-    margin-bottom: 5px;
-}
-
-.criterio-info p {
-    color: #666;
-    font-size: 0.95rem;
 }
 
 /* =========================================================
@@ -1142,10 +1062,8 @@ footer .creditos {
                 <li><a href="#efeito">Efeito Fotoelétrico</a></li>
                 <li><a href="#simulador">Simulador</a></li>
                 <li><a href="#piscina">Piscina Solar</a></li>
-                <li><a href="#robotica">Robótica</a></li>
                 <li><a href="#programacao">Programação</a></li>
                 <li><a href="#libras">Libras</a></li>
-                <li><a href="#avaliacao">Avaliação</a></li>
             </ul>
         </nav>
     </div>
@@ -1163,7 +1081,7 @@ footer .creditos {
             <p>
                 Descubra como o <strong>Efeito Fotoelétrico</strong> transforma fótons em eletricidade
                 e como essa ciência alimenta o <strong>Projeto da Piscina Solar</strong> — unindo
-                tecnociência, robótica e programação em uma solução sustentável e inclusiva.
+                tecnociência e programação em uma solução sustentável e inclusiva.
             </p>
             <div class="hero-botoes">
                 <a href="#simulador" class="btn btn-primario">
@@ -1375,64 +1293,13 @@ footer .creditos {
         </div>
     </section>
 
-    <!-- ROBÓTICA -->
-    <section id="robotica" class="robo-secao" aria-labelledby="titulo-robo">
-        <div class="container">
-            <div class="secao-titulo">
-                <h2 id="titulo-robo">Robótica Aplicada</h2>
-                <p>
-                    Robôs autônomos alimentados pela energia solar da piscina — a tecnociência
-                    em ação no mundo real.
-                </p>
-            </div>
-
-            <div class="grade-cards">
-                <article class="card" tabindex="0">
-                    <div class="card-icone" aria-hidden="true">🤖</div>
-                    <h3>Robô Limpador</h3>
-                    <p>
-                        Navega pelas paredes e fundo da piscina usando sensores ultrassônicos
-                        e escovas rotativas. Alimentado por bateria recarregada pelo painel solar.
-                    </p>
-                </article>
-
-                <article class="card" tabindex="0">
-                    <div class="card-icone" aria-hidden="true">🌡️</div>
-                    <h3>Sensor de Temperatura</h3>
-                    <p>
-                        Arduino + sensor DS18B20 monitora a temperatura da água em tempo real
-                        e aciona o aquecedor apenas quando necessário — economia inteligente.
-                    </p>
-                </article>
-
-                <article class="card" tabindex="0">
-                    <div class="card-icone" aria-hidden="true">💧</div>
-                    <h3>Dosador de Cloro</h3>
-                    <p>
-                        Motor de passo controlado por microcontrolador dosa a quantidade
-                        exata de cloro conforme o sensor de pH — água sempre equilibrada.
-                    </p>
-                </article>
-
-                <article class="card" tabindex="0">
-                    <div class="card-icone" aria-hidden="true">📡</div>
-                    <h3>IoT e Monitoramento</h3>
-                    <p>
-                        Módulo ESP32 envia dados para a nuvem. O usuário acompanha pelo celular
-                        temperatura, pH, consumo energético e status do sistema.
-                    </p>
-                </article>
-            </div>
-        </div>
-    </section>
-
     <!-- PROGRAMAÇÃO -->
     <section id="programacao" aria-labelledby="titulo-prog">
         <div class="container">
             <div class="secao-titulo">
                 <h2 id="titulo-prog">Programação em Ação</h2>
                 <p>
-                    O código que dá vida ao projeto: do simulador web ao controle dos robôs.
+                    O código que dá vida ao projeto: do simulador web ao controle dos sistemas.
                 </p>
             </div>
 
@@ -1508,83 +1375,20 @@ DallasTemperature sensores(&amp;oneWire);
                 <h2 id="titulo-libras">Acessibilidade em Libras</h2>
                 <p>
                     Educação para todos. Este site conta com VLibras integrado e estrutura
-                    preparada para vídeos em Língua Brasileira de Sinais.
+                    preparada para inclusão digital.
                 </p>
             </div>
 
             <div class="libras-container">
-                <h3>🤟 Vídeo explicativo em Libras</h3>
-                <div class="video-libras" role="region" aria-label="Espaço reservado para vídeo em Libras">
-                    <span>Espaço para vídeo em Libras sobre o Efeito Fotoelétrico</span>
-                </div>
-                <p>
+                <h3>🤟 Tradutor VLibras</h3>
+                <p style="margin-top: 20px; font-size: 1.1rem;">
                     <strong>VLibras</strong> já está ativo no canto inferior direito da tela.
-                    Clique no ícone e traduza qualquer texto do site para Libras.
+                    Clique no ícone azul e traduza qualquer texto do site para Libras instantaneamente.
                 </p>
                 <p style="margin-top: 15px;">
-                    <em>Em breve: vídeos originais em Libras produzidos pela equipe do projeto,
-                    com intérpretes certificados, para cada seção do site.</em>
+                    <em>O plugin oficial garante a tradução automática de todo o conteúdo textual
+                    desta página, promovendo a acessibilidade para a comunidade surda.</em>
                 </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- CRITÉRIOS DE AVALIAÇÃO -->
-    <section id="avaliacao" aria-labelledby="titulo-avaliacao">
-        <div class="container">
-            <div class="secao-titulo">
-                <h2 id="titulo-avaliacao">Critérios de Avaliação</h2>
-                <p>Como este projeto atende aos 6 eixos de avaliação propostos.</p>
-            </div>
-
-            <div class="criterios">
-                <div class="criterio-item">
-                    <div class="criterio-peso">10%</div>
-                    <div class="criterio-info">
-                        <h4>1. Estrutura e Navegação</h4>
-                        <p>Menu sticky, mapa do site funcional, skip links, âncoras internas e hierarquia clara de headings (h1→h2→h3).</p>
-                    </div>
-                </div>
-
-                <div class="criterio-item">
-                    <div class="criterio-peso">15%</div>
-                    <div class="criterio-info">
-                        <h4>2. Design e Responsividade</h4>
-                        <p>Identidade "Sol + Água" com gradientes dourado/azul, mobile-first, grid fluido, animações suaves e paleta coerente.</p>
-                    </div>
-                </div>
-
-                <div class="criterio-item">
-                    <div class="criterio-peso">30%</div>
-                    <div class="criterio-info">
-                        <h4>3. Profundidade Científica</h4>
-                        <p>Equação de Einstein, função trabalho, natureza quântica, comparação de materiais, frequência vs intensidade.</p>
-                    </div>
-                </div>
-
-                <div class="criterio-item">
-                    <div class="criterio-peso">20%</div>
-                    <div class="criterio-info">
-                        <h4>4. Interatividade e Simuladores</h4>
-                        <p>Simulador Canvas com controles de frequência, intensidade e material; cálculo em tempo real da energia cinética.</p>
-                    </div>
-                </div>
-
-                <div class="criterio-item">
-                    <div class="criterio-peso">15%</div>
-                    <div class="criterio-info">
-                        <h4>5. Acessibilidade e Inclusão</h4>
-                        <p>VLibras, alto contraste, fonte OpenDyslexic, navegação 100% por teclado, ARIA labels, skip link, foco visível.</p>
-                    </div>
-                </div>
-
-                <div class="criterio-item">
-                    <div class="criterio-peso">10%</div>
-                    <div class="criterio-info">
-                        <h4>6. Inovação e Impacto Social</h4>
-                        <p>Automação sustentável, inclusão digital, conscientização ambiental e integração entre ciência, tecnologia e sociedade.</p>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -1609,10 +1413,8 @@ DallasTemperature sensores(&amp;oneWire);
             <div class="mapa-coluna">
                 <h4>Tecnologia</h4>
                 <ul>
-                    <li><a href="#robotica">Robótica</a></li>
                     <li><a href="#programacao">Programação</a></li>
                     <li><a href="#libras">Libras</a></li>
-                    <li><a href="#avaliacao">Avaliação</a></li>
                 </ul>
             </div>
             <div class="mapa-coluna">
@@ -1639,7 +1441,7 @@ DallasTemperature sensores(&amp;oneWire);
 <!-- FOOTER -->
 <footer role="contentinfo">
     <p><strong>Luz que Move</strong> — Projeto Educacional Integrado</p>
-    <p>Efeito Fotoelétrico • Piscina Solar • Robótica • Programação</p>
+    <p>Efeito Fotoelétrico • Piscina Solar • Programação</p>
     <p>🌞 Sol + 💧 Água = ⚡ Energia para todos</p>
     <div class="creditos">
         <p>© 2026 — Desenvolvido com HTML5, CSS3 e JavaScript puros. Acessível, responsivo e inclusivo.</p>
@@ -2141,7 +1943,7 @@ const observer = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.1 });
 
-document.querySelectorAll('.card, .criterio-item, .comparativo-item').forEach(el => {
+document.querySelectorAll('.card, .comparativo-item').forEach(el => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(30px)';
     el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
@@ -2152,9 +1954,9 @@ document.querySelectorAll('.card, .criterio-item, .comparativo-item').forEach(el
    ATALHOS DE TECLADO (acessibilidade)
    ========================================================= */
 document.addEventListener('keydown', (e) => {
-    // Alt + 1 a 8 → pular para seções
-    if (e.altKey && /^[1-8]$/.test(e.key)) {
-        const secoes = ['inicio','efeito','simulador','piscina','robotica','programacao','libras','avaliacao'];
+    // Alt + 1 a 6 → pular para seções (ajustado após remoções)
+    if (e.altKey && /^[1-6]$/.test(e.key)) {
+        const secoes = ['inicio','efeito','simulador','piscina','programacao','libras'];
         const idx = parseInt(e.key) - 1;
         const el = document.getElementById(secoes[idx]);
         if (el) {
