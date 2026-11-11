@@ -1,1 +1,2191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Site educacional interativo sobre o Efeito Fotoelétrico e a conversão da luz em eletricidade, integrado ao Projeto da Piscina Solar." />
+<meta name="theme-color" content="#0a3d62" />
+<title>Luz que Move | Efeito Fotoelétrico & Piscina Solar</title>
 
+<!-- VLibras (acessibilidade em Libras) -->
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+<!-- Fonte OpenDyslexic -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&family=OpenDyslexic&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================
+   RESET E VARIÁVEIS GLOBAIS (Identidade Sol + Água)
+   ========================================================= */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --sol-claro: #ffd93d;
+    --sol-medio: #ffb627;
+    --sol-escuro: #f77f00;
+    --agua-profunda: #0a3d62;
+    --agua-media: #1e6091;
+    --agua-clara: #3c9ee0;
+    --agua-espuma: #cfe8f5;
+    --neutro-claro: #f8fafc;
+    --neutro-escuro: #1a1a2e;
+    --sucesso: #2ecc71;
+    --alerta: #e74c3c;
+    --texto: #1a1a2e;
+    --texto-claro: #f8fafc;
+    --sombra: 0 10px 30px rgba(10, 61, 98, 0.15);
+    --sombra-forte: 0 20px 50px rgba(10, 61, 98, 0.3);
+    --radius: 16px;
+    --transicao: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    --fonte-base: 'Poppins', system-ui, -apple-system, sans-serif;
+    --fonte-dyslexic: 'OpenDyslexic', 'Poppins', sans-serif;
+    --tamanho-base: 1rem;
+    --altura-linha: 1.7;
+}
+
+/* Modo Alto Contraste */
+body.alto-contraste {
+    --sol-claro: #ffff00;
+    --sol-medio: #ffff00;
+    --sol-escuro: #ffcc00;
+    --agua-profunda: #000000;
+    --agua-media: #000033;
+    --agua-clara: #ffffff;
+    --agua-espuma: #ffffff;
+    --neutro-claro: #ffffff;
+    --neutro-escuro: #000000;
+    --texto: #000000;
+    --texto-claro: #ffffff;
+}
+
+body.alto-contraste * {
+    border-color: #ffff00 !important;
+}
+
+/* Modo Dislexia */
+body.modo-dislexia {
+    --fonte-base: var(--fonte-dyslexic);
+    --tamanho-base: 1.15rem;
+    --altura-linha: 1.9;
+    letter-spacing: 0.05em;
+    word-spacing: 0.1em;
+}
+
+/* Modo Fonte Grande */
+body.fonte-grande {
+    --tamanho-base: 1.25rem;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+}
+
+body {
+    font-family: var(--fonte-base);
+    font-size: var(--tamanho-base);
+    line-height: var(--altura-linha);
+    color: var(--texto);
+    background: var(--neutro-claro);
+    overflow-x: hidden;
+}
+
+/* Skip Link (acessibilidade) */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 10px;
+    background: var(--sol-escuro);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    z-index: 10000;
+    font-weight: 600;
+    text-decoration: none;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 10px;
+    outline: 3px solid var(--agua-clara);
+}
+
+/* Foco visível em todos os elementos interativos */
+*:focus-visible {
+    outline: 3px solid var(--sol-escuro);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* =========================================================
+   FUNDO ANIMADO (Sol + Água)
+   ========================================================= */
+.fundo-animado {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    background: linear-gradient(180deg,
+        #ffe8a3 0%,
+        #ffd93d 15%,
+        #3c9ee0 55%,
+        #0a3d62 100%);
+    overflow: hidden;
+}
+
+.fundo-animado::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 20%, rgba(255,217,61,0.4), transparent 40%),
+                radial-gradient(circle at 70% 80%, rgba(60,158,224,0.3), transparent 40%);
+    animation: flutuar 20s ease-in-out infinite;
+}
+
+@keyframes flutuar {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    50% { transform: translate(-5%, 5%) rotate(180deg); }
+}
+
+.bolhas {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+}
+
+.bolha {
+    position: absolute;
+    bottom: -100px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    animation: subir linear infinite;
+}
+
+@keyframes subir {
+    to { transform: translateY(-110vh) scale(1.5); opacity: 0; }
+}
+
+/* =========================================================
+   HEADER E NAVEGAÇÃO
+   ========================================================= */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(10, 61, 98, 0.92);
+    backdrop-filter: blur(12px);
+    box-shadow: var(--sombra);
+    color: var(--texto-claro);
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.logo-icone {
+    width: 48px; height: 48px;
+    background: radial-gradient(circle at 30% 30%, var(--sol-claro), var(--sol-escuro));
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 20px var(--sol-medio);
+    animation: pulsar 3s ease-in-out infinite;
+}
+
+.logo-icone::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 2px dashed var(--sol-claro);
+    border-radius: 50%;
+    animation: girar 15s linear infinite;
+}
+
+@keyframes pulsar {
+    0%, 100% { box-shadow: 0 0 20px var(--sol-medio); }
+    50% { box-shadow: 0 0 35px var(--sol-claro); }
+}
+
+@keyframes girar {
+    to { transform: rotate(360deg); }
+}
+
+.logo-texto span {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 400;
+    opacity: 0.8;
+    letter-spacing: 0.1em;
+}
+
+nav ul {
+    display: flex;
+    gap: 8px;
+    list-style: none;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: var(--texto-claro);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: var(--transicao);
+    position: relative;
+}
+
+nav a:hover, nav a:focus {
+    background: var(--sol-medio);
+    color: var(--agua-profunda);
+    transform: translateY(-2px);
+}
+
+nav a[aria-current="page"] {
+    background: var(--sol-escuro);
+    color: #fff;
+}
+
+.menu-toggle {
+    display: none;
+    background: transparent;
+    border: 2px solid var(--sol-claro);
+    color: var(--sol-claro);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+/* =========================================================
+   BARRA DE ACESSIBILIDADE
+   ========================================================= */
+.acessibilidade-barra {
+    background: var(--agua-profunda);
+    color: var(--texto-claro);
+    padding: 8px 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid var(--sol-medio);
+}
+
+.acessibilidade-barra button {
+    background: transparent;
+    color: var(--texto-claro);
+    border: 1px solid var(--agua-clara);
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: var(--transicao);
+    font-family: inherit;
+}
+
+.acessibilidade-barra button:hover,
+.acessibilidade-barra button:focus {
+    background: var(--sol-claro);
+    color: var(--agua-profunda);
+    border-color: var(--sol-claro);
+}
+
+.acessibilidade-barra button.ativo {
+    background: var(--sol-escuro);
+    color: #fff;
+    border-color: var(--sol-escuro);
+}
+
+/* =========================================================
+   HERO (Capa)
+   ========================================================= */
+.hero {
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--texto-claro);
+    position: relative;
+}
+
+.hero-conteudo {
+    max-width: 900px;
+    animation: surgir 1.2s ease-out;
+}
+
+@keyframes surgir {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.hero h1 {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.hero h1 .destaque-sol {
+    background: linear-gradient(135deg, var(--sol-claro), var(--sol-escuro));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+.hero h1 .destaque-agua {
+    background: linear-gradient(135deg, var(--agua-espuma), var(--agua-clara));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+.hero p {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    margin-bottom: 35px;
+    opacity: 0.95;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-botoes {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 30px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: var(--transicao);
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btn-primario {
+    background: linear-gradient(135deg, var(--sol-claro), var(--sol-escuro));
+    color: var(--agua-profunda);
+    box-shadow: 0 8px 25px rgba(247,127,0,0.4);
+}
+
+.btn-primario:hover, .btn-primario:focus {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 35px rgba(247,127,0,0.6);
+}
+
+.btn-secundario {
+    background: transparent;
+    color: var(--texto-claro);
+    border: 2px solid var(--texto-claro);
+}
+
+.btn-secundario:hover, .btn-secundario:focus {
+    background: var(--texto-claro);
+    color: var(--agua-profunda);
+}
+
+/* =========================================================
+   SEÇÕES GERAIS
+   ========================================================= */
+main {
+    position: relative;
+    z-index: 1;
+}
+
+section {
+    padding: 80px 20px;
+    position: relative;
+}
+
+.container {
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.secao-titulo {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.secao-titulo h2 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    color: var(--agua-profunda);
+    margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+}
+
+.secao-titulo h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--sol-claro), var(--agua-clara));
+    border-radius: 2px;
+}
+
+.secao-titulo p {
+    color: var(--agua-media);
+    font-size: 1.1rem;
+    max-width: 700px;
+    margin: 20px auto 0;
+}
+
+/* =========================================================
+   CARDS DE CONTEÚDO (Efeito Fotoelétrico)
+   ========================================================= */
+.grade-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+}
+
+.card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 30px;
+    box-shadow: var(--sombra);
+    transition: var(--transicao);
+    border-top: 4px solid var(--agua-clara);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, rgba(255,217,61,0.05), rgba(60,158,224,0.05));
+    opacity: 0;
+    transition: var(--transicao);
+}
+
+.card:hover, .card:focus-within {
+    transform: translateY(-8px);
+    box-shadow: var(--sombra-forte);
+    border-top-color: var(--sol-escuro);
+}
+
+.card:hover::before { opacity: 1; }
+
+.card-icone {
+    width: 60px; height: 60px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, var(--sol-claro), var(--sol-escuro));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 15px rgba(247,127,0,0.3);
+}
+
+.card h3 {
+    color: var(--agua-profunda);
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+}
+
+.card p {
+    color: #555;
+    font-size: 0.98rem;
+}
+
+/* =========================================================
+   SIMULADOR INTERATIVO (Efeito Fotoelétrico)
+   ========================================================= */
+.simulador-wrapper {
+    background: linear-gradient(135deg, var(--agua-profunda), var(--agua-media));
+    border-radius: var(--radius);
+    padding: 40px;
+    box-shadow: var(--sombra-forte);
+    color: var(--texto-claro);
+}
+
+.simulador-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+@media (max-width: 900px) {
+    .simulador-grid { grid-template-columns: 1fr; }
+}
+
+.simulador-canvas-container {
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 16/10;
+    border: 2px solid var(--sol-medio);
+}
+
+#canvasSimulador {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.simulador-controles {
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+}
+
+.controle-grupo {
+    margin-bottom: 22px;
+}
+
+.controle-grupo label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    color: var(--sol-claro);
+}
+
+.controle-grupo input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.controle-grupo input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--sol-claro);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--sol-claro);
+}
+
+.controle-grupo input[type="range"]::-moz-range-thumb {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--sol-claro);
+    cursor: pointer;
+    border: none;
+}
+
+.controle-valor {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    opacity: 0.85;
+}
+
+.material-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid var(--agua-clara);
+    font-family: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.material-select option {
+    background: var(--agua-profunda);
+    color: #fff;
+}
+
+.painel-dados {
+    margin-top: 25px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.painel-dados div {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.15);
+}
+
+.painel-dados div:last-child { border-bottom: none; }
+
+.painel-dados .valor {
+    color: var(--sol-claro);
+    font-weight: 700;
+}
+
+.status-emissao {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    transition: var(--transicao);
+}
+
+.status-emissao.ativo {
+    background: rgba(46,204,113,0.2);
+    border: 1px solid var(--sucesso);
+    color: #a8f0c4;
+}
+
+.status-emissao.inativo {
+    background: rgba(231,76,60,0.2);
+    border: 1px solid var(--alerta);
+    color: #f5b7b1;
+}
+
+/* =========================================================
+   SEÇÃO PISCINA SOLAR
+   ========================================================= */
+.piscina-secao {
+    background: linear-gradient(180deg, transparent, rgba(60,158,224,0.1), transparent);
+}
+
+.piscina-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-top: 40px;
+}
+
+@media (max-width: 800px) {
+    .piscina-layout { grid-template-columns: 1fr; }
+}
+
+.piscina-visual {
+    position: relative;
+    aspect-ratio: 4/3;
+    background: linear-gradient(180deg, #87ceeb 0%, #4a90d9 40%, #1e6091 100%);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--sombra-forte);
+}
+
+.piscina-sol {
+    position: absolute;
+    top: 15%; right: 15%;
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, var(--sol-claro), var(--sol-escuro));
+    border-radius: 50%;
+    box-shadow: 0 0 40px var(--sol-medio);
+    animation: pulsar 4s ease-in-out infinite;
+}
+
+.piscina-painel {
+    position: absolute;
+    bottom: 40%; left: 10%;
+    width: 120px; height: 60px;
+    background: linear-gradient(135deg, #1a1a2e, #2c3e50);
+    border: 2px solid #34495e;
+    border-radius: 4px;
+    transform: perspective(200px) rotateX(20deg);
+}
+
+.piscina-painel::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background:
+        linear-gradient(90deg, transparent 49%, #34495e 49%, #34495e 51%, transparent 51%),
+        linear-gradient(0deg, transparent 49%, #34495e 49%, #34495e 51%, transparent 51%);
+    background-size: 25% 50%;
+}
+
+.piscina-agua {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 40%;
+    background: linear-gradient(180deg, rgba(60,158,224,0.6), rgba(10,61,98,0.9));
+    overflow: hidden;
+}
+
+.piscina-agua::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 200%; height: 10px;
+    background: repeating-linear-gradient(90deg,
+        transparent, transparent 20px,
+        rgba(255,255,255,0.3) 20px, rgba(255,255,255,0.3) 40px);
+    animation: ondas 3s linear infinite;
+}
+
+@keyframes ondas {
+    to { transform: translateX(-50%); }
+}
+
+.raios-solares {
+    position: absolute;
+    top: 20%; left: 20%;
+    width: 60%; height: 60%;
+    background: linear-gradient(135deg,
+        transparent 45%,
+        rgba(255,217,61,0.3) 50%,
+        transparent 55%);
+    animation: brilhar 2s ease-in-out infinite alternate;
+}
+
+@keyframes brilhar {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
+}
+
+.piscina-info h3 {
+    color: var(--agua-profunda);
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+}
+
+.piscina-info ul {
+    list-style: none;
+    margin-top: 20px;
+}
+
+.piscina-info li {
+    padding: 12px 0 12px 35px;
+    position: relative;
+    border-bottom: 1px solid rgba(10,61,98,0.1);
+}
+
+.piscina-info li::before {
+    content: '☀️';
+    position: absolute;
+    left: 0; top: 12px;
+    font-size: 1.2rem;
+}
+
+/* =========================================================
+   COMPARATIVO VISUAL
+   ========================================================= */
+.comparativo {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 20px;
+    align-items: stretch;
+    margin-top: 40px;
+}
+
+@media (max-width: 700px) {
+    .comparativo {
+        grid-template-columns: 1fr;
+    }
+    .comparativo-seta { transform: rotate(90deg); }
+}
+
+.comparativo-item {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 30px;
+    box-shadow: var(--sombra);
+    text-align: center;
+}
+
+.comparativo-item.tradicional { border-top: 5px solid #95a5a6; }
+.comparativo-item.solar { border-top: 5px solid var(--sol-escuro); }
+
+.comparativo-seta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--sol-escuro);
+    font-weight: 800;
+}
+
+.comparativo-item h4 {
+    color: var(--agua-profunda);
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.comparativo-item ul {
+    list-style: none;
+    text-align: left;
+}
+
+.comparativo-item li {
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.08);
+}
+
+.comparativo-item li::before {
+    content: '✓ ';
+    color: var(--sucesso);
+    font-weight: 700;
+}
+
+/* =========================================================
+   ROBOTICA E PROGRAMAÇÃO
+   ========================================================= */
+.robo-secao {
+    background: linear-gradient(135deg, rgba(10,61,98,0.05), rgba(255,217,61,0.05));
+}
+
+.codigo-exemplo {
+    background: #1a1a2e;
+    color: #f8fafc;
+    border-radius: var(--radius);
+    padding: 25px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    box-shadow: var(--sombra-forte);
+    margin-top: 25px;
+    position: relative;
+}
+
+.codigo-exemplo::before {
+    content: '● ● ●';
+    display: block;
+    color: #e74c3c;
+    letter-spacing: 5px;
+    margin-bottom: 15px;
+    font-size: 0.7rem;
+}
+
+.codigo-exemplo .kw { color: #ff79c6; }
+.codigo-exemplo .fn { color: #50fa7b; }
+.codigo-exemplo .str { color: #f1fa8c; }
+.codigo-exemplo .num { color: #bd93f9; }
+.codigo-exemplo .com { color: #6272a4; font-style: italic; }
+
+/* =========================================================
+   LIBRAS (vídeo placeholder)
+   ========================================================= */
+.libras-container {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 30px;
+    box-shadow: var(--sombra);
+    margin-top: 30px;
+    text-align: center;
+}
+
+.video-libras {
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 16/9;
+    background: linear-gradient(135deg, var(--agua-profunda), var(--agua-media));
+    border-radius: 12px;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.video-libras::before {
+    content: '🤟';
+    font-size: 4rem;
+    opacity: 0.5;
+    position: absolute;
+}
+
+.video-libras span {
+    position: relative;
+    z-index: 1;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+/* =========================================================
+   CRITÉRIOS DE AVALIAÇÃO
+   ========================================================= */
+.criterios {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 30px;
+    box-shadow: var(--sombra);
+    margin-top: 30px;
+}
+
+.criterio-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    transition: var(--transicao);
+}
+
+.criterio-item:hover {
+    background: rgba(255,217,61,0.08);
+    transform: translateX(5px);
+}
+
+.criterio-peso {
+    min-width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--sol-claro), var(--sol-escuro));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--agua-profunda);
+    box-shadow: 0 4px 15px rgba(247,127,0,0.3);
+}
+
+.criterio-info h4 {
+    color: var(--agua-profunda);
+    margin-bottom: 5px;
+}
+
+.criterio-info p {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+/* =========================================================
+   MAPA DO SITE
+   ========================================================= */
+.mapa-site {
+    background: var(--agua-profunda);
+    color: var(--texto-claro);
+    padding: 50px 20px;
+    margin-top: 60px;
+}
+
+.mapa-site-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    max-width: 1300px;
+    margin: 30px auto 0;
+}
+
+.mapa-coluna h4 {
+    color: var(--sol-claro);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    border-bottom: 2px solid var(--sol-medio);
+    padding-bottom: 8px;
+}
+
+.mapa-coluna ul {
+    list-style: none;
+}
+
+.mapa-coluna a {
+    color: var(--texto-claro);
+    text-decoration: none;
+    padding: 6px 0;
+    display: block;
+    opacity: 0.85;
+    transition: var(--transicao);
+}
+
+.mapa-coluna a:hover, .mapa-coluna a:focus {
+    opacity: 1;
+    color: var(--sol-claro);
+    transform: translateX(5px);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+footer {
+    background: var(--neutro-escuro);
+    color: var(--texto-claro);
+    padding: 40px 20px 20px;
+    text-align: center;
+}
+
+footer p {
+    margin: 8px 0;
+    opacity: 0.85;
+}
+
+footer .creditos {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.85rem;
+    opacity: 0.6;
+}
+
+/* =========================================================
+   RESPONSIVIDADE
+   ========================================================= */
+@media (max-width: 768px) {
+    .menu-toggle { display: block; }
+    nav ul {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 5px;
+    }
+    nav ul.aberto { display: flex; }
+    nav a { display: block; text-align: center; }
+    .header-container { padding: 12px 20px; }
+    section { padding: 50px 15px; }
+    .simulador-wrapper { padding: 20px; }
+    .hero { min-height: 70vh; padding: 50px 15px; }
+}
+
+/* Reduz movimento (preferência do usuário) */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Impressão */
+@media print {
+    .acessibilidade-barra, header, .fundo-animado, .simulador-wrapper { display: none; }
+    body { background: #fff; color: #000; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Skip link para acessibilidade -->
+<a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
+
+<!-- Fundo animado Sol + Água -->
+<div class="fundo-animado" aria-hidden="true">
+    <div class="bolhas" id="bolhas"></div>
+</div>
+
+<!-- Barra de Acessibilidade -->
+<div class="acessibilidade-barra" role="region" aria-label="Ferramentas de acessibilidade">
+    <button id="btnAltoContraste" aria-pressed="false" title="Ativar alto contraste">
+        ◐ Alto Contraste
+    </button>
+    <button id="btnDislexia" aria-pressed="false" title="Fonte para dislexia">
+        🧠 Fonte Dislexia
+    </button>
+    <button id="btnFonteGrande" aria-pressed="false" title="Aumentar fonte">
+        🔍 Fonte Grande
+    </button>
+    <button id="btnLeitura" title="Modo leitura em voz alta">
+        🔊 Leitura
+    </button>
+</div>
+
+<!-- HEADER -->
+<header role="banner">
+    <div class="header-container">
+        <div class="logo">
+            <div class="logo-icone" aria-hidden="true"></div>
+            <div class="logo-texto">
+                Luz que Move
+                <span>Efeito Fotoelétrico & Piscina Solar</span>
+            </div>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="menuPrincipal">
+            ☰ Menu
+        </button>
+        <nav aria-label="Menu principal">
+            <ul id="menuPrincipal">
+                <li><a href="#inicio" aria-current="page">Início</a></li>
+                <li><a href="#efeito">Efeito Fotoelétrico</a></li>
+                <li><a href="#simulador">Simulador</a></li>
+                <li><a href="#piscina">Piscina Solar</a></li>
+                <li><a href="#robotica">Robótica</a></li>
+                <li><a href="#programacao">Programação</a></li>
+                <li><a href="#libras">Libras</a></li>
+                <li><a href="#avaliacao">Avaliação</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main id="conteudo-principal">
+
+    <!-- HERO -->
+    <section class="hero" id="inicio" aria-labelledby="titulo-hero">
+        <div class="hero-conteudo">
+            <h1 id="titulo-hero">
+                Da <span class="destaque-sol">Luz do Sol</span><br>
+                à <span class="destaque-agua">Água da Piscina</span>
+            </h1>
+            <p>
+                Descubra como o <strong>Efeito Fotoelétrico</strong> transforma fótons em eletricidade
+                e como essa ciência alimenta o <strong>Projeto da Piscina Solar</strong> — unindo
+                tecnociência, robótica e programação em uma solução sustentável e inclusiva.
+            </p>
+            <div class="hero-botoes">
+                <a href="#simulador" class="btn btn-primario">
+                    ⚡ Experimentar Simulador
+                </a>
+                <a href="#piscina" class="btn btn-secundario">
+                    💧 Ver Projeto Piscina
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- EFEITO FOTOELÉTRICO -->
+    <section id="efeito" aria-labelledby="titulo-efeito">
+        <div class="container">
+            <div class="secao-titulo">
+                <h2 id="titulo-efeito">O Efeito Fotoelétrico</h2>
+                <p>
+                    A descoberta de Albert Einstein (1905) que revelou a natureza quântica da luz
+                    e abriu as portas para a energia solar moderna.
+                </p>
+            </div>
+
+            <div class="grade-cards">
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">🔬</div>
+                    <h3>O que é?</h3>
+                    <p>
+                        Fenômeno no qual <strong>fótons</strong> (partículas de luz) atingem a superfície
+                        de um material e ejetam <strong>elétrons</strong>, gerando corrente elétrica.
+                        A energia do fóton deve ser maior que a <em>função trabalho</em> do material.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">📐</div>
+                    <h3>A Equação de Einstein</h3>
+                    <p>
+                        <strong>E<sub>c</sub> = h·f − φ</strong><br>
+                        Onde <em>h</em> é a constante de Planck, <em>f</em> a frequência da luz,
+                        e <em>φ</em> a função trabalho (energia mínima para arrancar o elétron).
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">🌈</div>
+                    <h3>Frequência vs Intensidade</h3>
+                    <p>
+                        A <strong>emissão de elétrons</strong> depende da <em>frequência</em> da luz,
+                        não da intensidade. Luz vermelha fraca pode não ejetar elétrons, mas luz
+                        ultravioleta intensa ejeta muitos.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">☀️</div>
+                    <h3>Células Solares</h3>
+                    <p>
+                        Painéis fotovoltaicos aplicam o efeito fotoelétrico em semicondutores (silício)
+                        para converter luz solar em eletricidade — a base do nosso Projeto Piscina Solar.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">⚛️</div>
+                    <h3>Natureza Quântica</h3>
+                    <p>
+                        A luz se comporta como <strong>onda e partícula</strong>. Os fótons são "pacotes"
+                        discretos de energia. Essa dualidade é a base da mecânica quântica.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">🏆</div>
+                    <h3>Prêmio Nobel 1921</h3>
+                    <p>
+                        Einstein recebeu o Nobel de Física pela explicação do efeito fotoelétrico —
+                        não pela Teoria da Relatividade! Essa descoberta mudou a física para sempre.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- SIMULADOR INTERATIVO -->
+    <section id="simulador" aria-labelledby="titulo-simulador">
+        <div class="container">
+            <div class="secao-titulo">
+                <h2 id="titulo-simulador">Simulador Interativo</h2>
+                <p>
+                    Ajuste a frequência da luz, a intensidade e o material. Observe em tempo real
+                    se os elétrons são ejetados e qual a energia cinética resultante.
+                </p>
+            </div>
+
+            <div class="simulador-wrapper">
+                <div class="simulador-grid">
+                    <div class="simulador-canvas-container">
+                        <canvas id="canvasSimulador" role="img" aria-label="Animação do efeito fotoelétrico mostrando fótons atingindo uma placa metálica e elétrons sendo ejetados"></canvas>
+                    </div>
+
+                    <div class="simulador-controles" role="group" aria-label="Controles do simulador">
+                        <div class="controle-grupo">
+                            <label for="freqSlider">🌈 Frequência da luz (THz)</label>
+                            <input type="range" id="freqSlider" min="400" max="1000" value="600" step="10" aria-valuemin="400" aria-valuemax="1000" aria-valuenow="600">
+                            <div class="controle-valor">
+                                <span>400 (vermelho)</span>
+                                <span id="freqValor">600 THz</span>
+                                <span>1000 (UV)</span>
+                            </div>
+                        </div>
+
+                        <div class="controle-grupo">
+                            <label for="intSlider">💡 Intensidade (fótons/s)</label>
+                            <input type="range" id="intSlider" min="1" max="20" value="8" step="1">
+                            <div class="controle-valor">
+                                <span>Fraca</span>
+                                <span id="intValor">8</span>
+                                <span>Forte</span>
+                            </div>
+                        </div>
+
+                        <div class="controle-grupo">
+                            <label for="materialSelect">🔩 Material da placa</label>
+                            <select id="materialSelect" class="material-select">
+                                <option value="2.1">Césio (φ = 2,1 eV)</option>
+                                <option value="2.3" selected>Potássio (φ = 2,3 eV)</option>
+                                <option value="3.7">Cobre (φ = 3,7 eV)</option>
+                                <option value="4.7">Ferro (φ = 4,7 eV)</option>
+                                <option value="5.1">Ouro (φ = 5,1 eV)</option>
+                            </select>
+                        </div>
+
+                        <div class="painel-dados" aria-live="polite">
+                            <div><span>Energia do fóton:</span> <span class="valor" id="energiaFoton">2.48 eV</span></div>
+                            <div><span>Função trabalho:</span> <span class="valor" id="funcaoTrabalho">2.30 eV</span></div>
+                            <div><span>Energia cinética:</span> <span class="valor" id="energiaCinetica">0.18 eV</span></div>
+                            <div><span>Elétrons/s:</span> <span class="valor" id="eletronsSegundo">8</span></div>
+                        </div>
+
+                        <div class="status-emissao inativo" id="statusEmissao" aria-live="assertive">
+                            ⚠️ Frequência abaixo do limite — sem emissão
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PISCINA SOLAR -->
+    <section id="piscina" class="piscina-secao" aria-labelledby="titulo-piscina">
+        <div class="container">
+            <div class="secao-titulo">
+                <h2 id="titulo-piscina">Projeto da Piscina Solar</h2>
+                <p>
+                    Como o efeito fotoelétrico se conecta ao aquecimento e à automação da piscina
+                    por meio de energia solar fotovoltaica.
+                </p>
+            </div>
+
+            <div class="piscina-layout">
+                <div class="piscina-visual" aria-hidden="true">
+                    <div class="piscina-sol"></div>
+                    <div class="raios-solares"></div>
+                    <div class="piscina-painel"></div>
+                    <div class="piscina-agua"></div>
+                </div>
+
+                <div class="piscina-info">
+                    <h3>Conexão Ciência → Aplicação</h3>
+                    <p>
+                        Os painéis solares instalados ao redor da piscina capturam fótons da luz solar
+                        e, pelo efeito fotoelétrico no silício, geram eletricidade que alimenta:
+                    </p>
+                    <ul>
+                        <li><strong>Bomba de recirculação</strong> — filtragem contínua da água</li>
+                        <li><strong>Aquecedor elétrico</strong> — controle térmico automatizado</li>
+                        <li><strong>Sensor de pH e cloro</strong> — dosagem inteligente</li>
+                        <li><strong>Iluminação LED subaquática</strong> — eficiência máxima</li>
+                        <li><strong>Robô limpador autônomo</strong> — navegação programada</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Comparativo visual -->
+            <div class="comparativo" role="region" aria-label="Comparativo entre sistemas">
+                <div class="comparativo-item tradicional">
+                    <h4>🔌 Sistema Tradicional</h4>
+                    <ul>
+                        <li>Energia da rede elétrica</li>
+                        <li>Alta conta de luz mensal</li>
+                        <li>Dependência de combustíveis fósseis</li>
+                        <li>Emissão de CO₂</li>
+                        <li>Manutenção cara</li>
+                    </ul>
+                </div>
+                <div class="comparativo-seta" aria-hidden="true">➜</div>
+                <div class="comparativo-item solar">
+                    <h4>☀️ Piscina Solar Inteligente</h4>
+                    <ul>
+                        <li>Energia 100% fotovoltaica</li>
+                        <li>Economia de até 90%</li>
+                        <li>Fonte renovável e limpa</li>
+                        <li>Zero emissão operacional</li>
+                        <li>Automação por robótica</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROBÓTICA -->
+    <section id="robotica" class="robo-secao" aria-labelledby="titulo-robo">
+        <div class="container">
+            <div class="secao-titulo">
+                <h2 id="titulo-robo">Robótica Aplicada</h2>
+                <p>
+                    Robôs autônomos alimentados pela energia solar da piscina — a tecnociência
+                    em ação no mundo real.
+                </p>
+            </div>
+
+            <div class="grade-cards">
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">🤖</div>
+                    <h3>Robô Limpador</h3>
+                    <p>
+                        Navega pelas paredes e fundo da piscina usando sensores ultrassônicos
+                        e escovas rotativas. Alimentado por bateria recarregada pelo painel solar.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">🌡️</div>
+                    <h3>Sensor de Temperatura</h3>
+                    <p>
+                        Arduino + sensor DS18B20 monitora a temperatura da água em tempo real
+                        e aciona o aquecedor apenas quando necessário — economia inteligente.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">💧</div>
+                    <h3>Dosador de Cloro</h3>
+                    <p>
+                        Motor de passo controlado por microcontrolador dosa a quantidade
+                        exata de cloro conforme o sensor de pH — água sempre equilibrada.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">📡</div>
+                    <h3>IoT e Monitoramento</h3>
+                    <p>
+                        Módulo ESP32 envia dados para a nuvem. O usuário acompanha pelo celular
+                        temperatura, pH, consumo energético e status do sistema.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROGRAMAÇÃO -->
+    <section id="programacao" aria-labelledby="titulo-prog">
+        <div class="container">
+            <div class="secao-titulo">
+                <h2 id="titulo-prog">Programação em Ação</h2>
+                <p>
+                    O código que dá vida ao projeto: do simulador web ao controle dos robôs.
+                </p>
+            </div>
+
+            <div class="grade-cards">
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">🌐</div>
+                    <h3>HTML, CSS e JavaScript</h3>
+                    <p>
+                        Este próprio site foi construído com essas três linguagens —
+                        simuladores interativos, animações e acessibilidade em código puro.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">⚙️</div>
+                    <h3>Arduino / C++</h3>
+                    <p>
+                        Linguagem usada para programar os microcontroladores que controlam
+                        sensores, motores e atuadores do sistema da piscina.
+                    </p>
+                </article>
+
+                <article class="card" tabindex="0">
+                    <div class="card-icone" aria-hidden="true">🐍</div>
+                    <h3>Python e Ciência de Dados</h3>
+                    <p>
+                        Análise dos dados coletados, gráficos de eficiência energética
+                        e machine learning para prever consumo e otimizar operação.
+                    </p>
+                </article>
+            </div>
+
+            <h3 style="color: var(--agua-profunda); margin-top: 40px; text-align: center;">
+                Exemplo de código: leitura do sensor de temperatura
+            </h3>
+
+            <pre class="codigo-exemplo" tabindex="0" aria-label="Exemplo de código em C++ para Arduino"><code><span class="com">// Leitura do sensor DS18B20 na piscina</span>
+<span class="kw">#include</span> <span class="str">&lt;OneWire.h&gt;</span>
+<span class="kw">#include</span> <span class="str">&lt;DallasTemperature.h&gt;</span>
+
+<span class="kw">const int</span> PINO_SENSOR = <span class="num">2</span>;
+OneWire oneWire(PINO_SENSOR);
+DallasTemperature sensores(&amp;oneWire);
+
+<span class="kw">void</span> <span class="fn">setup</span>() {
+  Serial.<span class="fn">begin</span>(<span class="num">9600</span>);
+  sensores.<span class="fn">begin</span>();
+  <span class="fn">pinMode</span>(<span class="num">8</span>, OUTPUT); <span class="com">// relé do aquecedor</span>
+}
+
+<span class="kw">void</span> <span class="fn">loop</span>() {
+  sensores.<span class="fn">requestTemperatures</span>();
+  <span class="kw">float</span> temp = sensores.<span class="fn">getTempCByIndex</span>(<span class="num">0</span>);
+
+  Serial.<span class="fn">print</span>(<span class="str">"Temperatura: "</span>);
+  Serial.<span class="fn">println</span>(temp);
+
+  <span class="com">// Liga aquecedor se &lt; 26°C</span>
+  <span class="kw">if</span> (temp &lt; <span class="num">26.0</span>) {
+    <span class="fn">digitalWrite</span>(<span class="num">8</span>, HIGH);
+  } <span class="kw">else</span> {
+    <span class="fn">digitalWrite</span>(<span class="num">8</span>, LOW);
+  }
+  <span class="fn">delay</span>(<span class="num">2000</span>);
+}</code></pre>
+        </div>
+    </section>
+
+    <!-- LIBRAS -->
+    <section id="libras" aria-labelledby="titulo-libras">
+        <div class="container">
+            <div class="secao-titulo">
+                <h2 id="titulo-libras">Acessibilidade em Libras</h2>
+                <p>
+                    Educação para todos. Este site conta com VLibras integrado e estrutura
+                    preparada para vídeos em Língua Brasileira de Sinais.
+                </p>
+            </div>
+
+            <div class="libras-container">
+                <h3>🤟 Vídeo explicativo em Libras</h3>
+                <div class="video-libras" role="region" aria-label="Espaço reservado para vídeo em Libras">
+                    <span>Espaço para vídeo em Libras sobre o Efeito Fotoelétrico</span>
+                </div>
+                <p>
+                    <strong>VLibras</strong> já está ativo no canto inferior direito da tela.
+                    Clique no ícone e traduza qualquer texto do site para Libras.
+                </p>
+                <p style="margin-top: 15px;">
+                    <em>Em breve: vídeos originais em Libras produzidos pela equipe do projeto,
+                    com intérpretes certificados, para cada seção do site.</em>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CRITÉRIOS DE AVALIAÇÃO -->
+    <section id="avaliacao" aria-labelledby="titulo-avaliacao">
+        <div class="container">
+            <div class="secao-titulo">
+                <h2 id="titulo-avaliacao">Critérios de Avaliação</h2>
+                <p>Como este projeto atende aos 6 eixos de avaliação propostos.</p>
+            </div>
+
+            <div class="criterios">
+                <div class="criterio-item">
+                    <div class="criterio-peso">10%</div>
+                    <div class="criterio-info">
+                        <h4>1. Estrutura e Navegação</h4>
+                        <p>Menu sticky, mapa do site funcional, skip links, âncoras internas e hierarquia clara de headings (h1→h2→h3).</p>
+                    </div>
+                </div>
+
+                <div class="criterio-item">
+                    <div class="criterio-peso">15%</div>
+                    <div class="criterio-info">
+                        <h4>2. Design e Responsividade</h4>
+                        <p>Identidade "Sol + Água" com gradientes dourado/azul, mobile-first, grid fluido, animações suaves e paleta coerente.</p>
+                    </div>
+                </div>
+
+                <div class="criterio-item">
+                    <div class="criterio-peso">30%</div>
+                    <div class="criterio-info">
+                        <h4>3. Profundidade Científica</h4>
+                        <p>Equação de Einstein, função trabalho, natureza quântica, comparação de materiais, frequência vs intensidade.</p>
+                    </div>
+                </div>
+
+                <div class="criterio-item">
+                    <div class="criterio-peso">20%</div>
+                    <div class="criterio-info">
+                        <h4>4. Interatividade e Simuladores</h4>
+                        <p>Simulador Canvas com controles de frequência, intensidade e material; cálculo em tempo real da energia cinética.</p>
+                    </div>
+                </div>
+
+                <div class="criterio-item">
+                    <div class="criterio-peso">15%</div>
+                    <div class="criterio-info">
+                        <h4>5. Acessibilidade e Inclusão</h4>
+                        <p>VLibras, alto contraste, fonte OpenDyslexic, navegação 100% por teclado, ARIA labels, skip link, foco visível.</p>
+                    </div>
+                </div>
+
+                <div class="criterio-item">
+                    <div class="criterio-peso">10%</div>
+                    <div class="criterio-info">
+                        <h4>6. Inovação e Impacto Social</h4>
+                        <p>Automação sustentável, inclusão digital, conscientização ambiental e integração entre ciência, tecnologia e sociedade.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- MAPA DO SITE -->
+<div class="mapa-site" role="navigation" aria-label="Mapa do site">
+    <div class="container">
+        <h3 style="text-align: center; color: var(--sol-claro); font-size: 1.5rem;">
+            🗺️ Mapa do Site
+        </h3>
+        <div class="mapa-site-grid">
+            <div class="mapa-coluna">
+                <h4>Navegação</h4>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#efeito">Efeito Fotoelétrico</a></li>
+                    <li><a href="#simulador">Simulador</a></li>
+                    <li><a href="#piscina">Piscina Solar</a></li>
+                </ul>
+            </div>
+            <div class="mapa-coluna">
+                <h4>Tecnologia</h4>
+                <ul>
+                    <li><a href="#robotica">Robótica</a></li>
+                    <li><a href="#programacao">Programação</a></li>
+                    <li><a href="#libras">Libras</a></li>
+                    <li><a href="#avaliacao">Avaliação</a></li>
+                </ul>
+            </div>
+            <div class="mapa-coluna">
+                <h4>Recursos</h4>
+                <ul>
+                    <li><a href="#" onclick="document.getElementById('btnAltoContraste').click(); return false;">Alto Contraste</a></li>
+                    <li><a href="#" onclick="document.getElementById('btnDislexia').click(); return false;">Fonte Dislexia</a></li>
+                    <li><a href="#" onclick="document.getElementById('btnFonteGrande').click(); return false;">Fonte Grande</a></li>
+                </ul>
+            </div>
+            <div class="mapa-coluna">
+                <h4>Créditos</h4>
+                <ul>
+                    <li><a href="#">Sobre o Projeto</a></li>
+                    <li><a href="#">Equipe</a></li>
+                    <li><a href="#">Bibliografia</a></li>
+                    <li><a href="#">Contato</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer role="contentinfo">
+    <p><strong>Luz que Move</strong> — Projeto Educacional Integrado</p>
+    <p>Efeito Fotoelétrico • Piscina Solar • Robótica • Programação</p>
+    <p>🌞 Sol + 💧 Água = ⚡ Energia para todos</p>
+    <div class="creditos">
+        <p>© 2026 — Desenvolvido com HTML5, CSS3 e JavaScript puros. Acessível, responsivo e inclusivo.</p>
+        <p>VLibras integrado • WCAG 2.1 nível AA • Navegação por teclado</p>
+    </div>
+</footer>
+
+<script>
+/* =========================================================
+   VLIBRAS - Inicialização
+   ========================================================= */
+window.addEventListener('load', function() {
+    if (window.VLibras) {
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+    }
+});
+
+/* =========================================================
+   BOLHAS ANIMADAS DO FUNDO
+   ========================================================= */
+(function criarBolhas() {
+    const container = document.getElementById('bolhas');
+    const total = 20;
+    for (let i = 0; i < total; i++) {
+        const bolha = document.createElement('div');
+        bolha.className = 'bolha';
+        const tamanho = Math.random() * 40 + 10;
+        bolha.style.width = tamanho + 'px';
+        bolha.style.height = tamanho + 'px';
+        bolha.style.left = Math.random() * 100 + '%';
+        bolha.style.animationDuration = (Math.random() * 15 + 10) + 's';
+        bolha.style.animationDelay = (Math.random() * 10) + 's';
+        bolha.style.opacity = Math.random() * 0.5 + 0.2;
+        container.appendChild(bolha);
+    }
+})();
+
+/* =========================================================
+   MENU MOBILE
+   ========================================================= */
+const menuToggle = document.getElementById('menuToggle');
+const menuPrincipal = document.getElementById('menuPrincipal');
+menuToggle.addEventListener('click', () => {
+    const aberto = menuPrincipal.classList.toggle('aberto');
+    menuToggle.setAttribute('aria-expanded', aberto);
+});
+
+// Fechar menu ao clicar em link (mobile)
+menuPrincipal.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            menuPrincipal.classList.remove('aberto');
+            menuToggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+});
+
+/* =========================================================
+   FERRAMENTAS DE ACESSIBILIDADE
+   ========================================================= */
+function toggleModo(btnId, classeBody) {
+    const btn = document.getElementById(btnId);
+    btn.addEventListener('click', () => {
+        document.body.classList.toggle(classeBody);
+        const ativo = document.body.classList.contains(classeBody);
+        btn.setAttribute('aria-pressed', ativo);
+        btn.classList.toggle('ativo', ativo);
+    });
+}
+
+toggleModo('btnAltoContraste', 'alto-contraste');
+toggleModo('btnDislexia', 'modo-dislexia');
+toggleModo('btnFonteGrande', 'fonte-grande');
+
+// Modo leitura (síntese de voz)
+let leituraAtiva = false;
+document.getElementById('btnLeitura').addEventListener('click', function() {
+    leituraAtiva = !leituraAtiva;
+    this.classList.toggle('ativo', leituraAtiva);
+    this.setAttribute('aria-pressed', leituraAtiva);
+
+    if (leituraAtiva) {
+        if ('speechSynthesis' in window) {
+            const texto = 'Modo leitura ativado. Clique em qualquer parágrafo para ouvi-lo.';
+            const utter = new SpeechSynthesisUtterance(texto);
+            utter.lang = 'pt-BR';
+            speechSynthesis.speak(utter);
+        }
+        document.querySelectorAll('p, h1, h2, h3, h4, li').forEach(el => {
+            el.style.cursor = 'pointer';
+            el.addEventListener('click', lerElemento);
+        });
+    } else {
+        speechSynthesis.cancel();
+        document.querySelectorAll('p, h1, h2, h3, h4, li').forEach(el => {
+            el.style.cursor = '';
+            el.removeEventListener('click', lerElemento);
+        });
+    }
+});
+
+function lerElemento() {
+    if (!leituraAtiva) return;
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(this.innerText);
+    utter.lang = 'pt-BR';
+    utter.rate = 0.95;
+    speechSynthesis.speak(utter);
+}
+
+/* =========================================================
+   SIMULADOR DO EFEITO FOTOELÉTRICO (Canvas)
+   ========================================================= */
+const canvas = document.getElementById('canvasSimulador');
+const ctx = canvas.getContext('2d');
+
+// Ajustar resolução do canvas
+function redimensionarCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+}
+redimensionarCanvas();
+window.addEventListener('resize', redimensionarCanvas);
+
+// Estado do simulador
+const estado = {
+    frequencia: 600,     // THz
+    intensidade: 8,
+    funcaoTrabalho: 2.3, // eV
+    fotons: [],
+    eletrons: [],
+    faiscas: []
+};
+
+const H = 4.1357e-15; // constante de Planck em eV·s
+
+// Converter frequência (THz) em cor visível aproximada
+function frequenciaParaCor(freqTHz) {
+    // 400 THz = vermelho, 750 THz = violeta, >750 = UV (roxo brilhante)
+    if (freqTHz < 450) return '#ff3030';
+    if (freqTHz < 500) return '#ff8c00';
+    if (freqTHz < 550) return '#ffd700';
+    if (freqTHz < 600) return '#adff2f';
+    if (freqTHz < 650) return '#00ff00';
+    if (freqTHz < 700) return '#00bfff';
+    if (freqTHz < 750) return '#4169e1';
+    if (freqTHz < 850) return '#8a2be2';
+    return '#da70d6'; // UV
+}
+
+// Criar novo fóton
+function criarFoton() {
+    const w = canvas.width / window.devicePixelRatio;
+    const h = canvas.height / window.devicePixelRatio;
+    return {
+        x: -10,
+        y: Math.random() * (h * 0.6) + h * 0.1,
+        vx: 3 + Math.random() * 2,
+        cor: frequenciaParaCor(estado.frequencia),
+        tamanho: 4 + Math.random() * 3,
+        vivo: true
+    };
+}
+
+// Criar elétron ejetado
+function criarEletron(x, y, energia) {
+    const velocidade = 2 + energia * 3;
+    const angulo = (Math.random() - 0.5) * 0.8;
+    return {
+        x: x,
+        y: y,
+        vx: velocidade * Math.cos(angulo),
+        vy: velocidade * Math.sin(angulo) - 1,
+        vida: 100,
+        vivo: true
+    };
+}
+
+// Criar faísca de impacto
+function criarFaisca(x, y, cor) {
+    for (let i = 0; i < 5; i++) {
+        estado.faiscas.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            vida: 30,
+            cor: cor
+        });
+    }
+}
+
+// Desenhar placa metálica
+function desenharPlaca() {
+    const w = canvas.width / window.devicePixelRatio;
+    const h = canvas.height / window.devicePixelRatio;
+    const placaX = w * 0.55;
+    const placaLargura = 20;
+    const placaAltura = h * 0.7;
+    const placaY = (h - placaAltura) / 2;
+
+    // Sombra
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(placaX + 3, placaY + 3, placaLargura, placaAltura);
+
+    // Placa (gradiente metálico)
+    const grad = ctx.createLinearGradient(placaX, 0, placaX + placaLargura, 0);
+    grad.addColorStop(0, '#4a4a4a');
+    grad.addColorStop(0.5, '#8a8a8a');
+    grad.addColorStop(1, '#3a3a3a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(placaX, placaY, placaLargura, placaAltura);
+
+    // Borda
+    ctx.strokeStyle = '#c0c0c0';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(placaX, placaY, placaLargura, placaAltura);
+
+    // Etiqueta
+    ctx.fillStyle = '#ffd93d';
+    ctx.font = 'bold 12px Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PLACA', placaX + placaLargura/2, placaY - 8);
+    ctx.fillText('METÁLICA', placaX + placaLargura/2, placaY + placaAltura + 18);
+
+    return { x: placaX, largura: placaLargura, y: placaY, altura: placaAltura };
+}
+
+// Desenhar coletor (lado direito)
+function desenharColetor() {
+    const w = canvas.width / window.devicePixelRatio;
+    const h = canvas.height / window.devicePixelRatio;
+    const coletorX = w * 0.85;
+    const coletorLargura = 15;
+    const coletorAltura = h * 0.5;
+    const coletorY = (h - coletorAltura) / 2;
+
+    const grad = ctx.createLinearGradient(coletorX, 0, coletorX + coletorLargura, 0);
+    grad.addColorStop(0, '#2c3e50');
+    grad.addColorStop(1, '#34495e');
+    ctx.fillStyle = grad;
+    ctx.fillRect(coletorX, coletorY, coletorLargura, coletorAltura);
+
+    ctx.strokeStyle = '#3c9ee0';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(coletorX, coletorY, coletorLargura, coletorAltura);
+
+    ctx.fillStyle = '#3c9ee0';
+    ctx.font = 'bold 11px Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('COLETOR', coletorX + coletorLargura/2, coletorY - 8);
+
+    // Fios conectando ao amperímetro
+    ctx.strokeStyle = '#ffd93d';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(coletorX + coletorLargura, coletorY + coletorAltura/2);
+    ctx.lineTo(w - 10, coletorY + coletorAltura/2);
+    ctx.stroke();
+}
+
+// Desenhar fonte de luz
+function desenharFonteLuz() {
+    const w = canvas.width / window.devicePixelRatio;
+    const h = canvas.height / window.devicePixelRatio;
+    const cor = frequenciaParaCor(estado.frequencia);
+
+    // Lâmpada
+    ctx.fillStyle = cor;
+    ctx.shadowColor = cor;
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(30, h/2, 18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Base
+    ctx.fillStyle = '#555';
+    ctx.fillRect(10, h/2 + 18, 40, 8);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('FONTE', 30, h/2 + 40);
+    ctx.fillText('DE LUZ', 30, h/2 + 52);
+}
+
+// Loop de animação
+let ultimoFrame = 0;
+let contadorFotons = 0;
+
+function animar(tempo) {
+    const w = canvas.width / window.devicePixelRatio;
+    const h = canvas.height / window.devicePixelRatio;
+
+    // Fundo gradiente
+    const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+    bgGrad.addColorStop(0, '#0a0a1e');
+    bgGrad.addColorStop(1, '#1a1a3e');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // Grid sutil
+    ctx.strokeStyle = 'rgba(60,158,224,0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < w; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, h);
+        ctx.stroke();
+    }
+    for (let i = 0; i < h; i += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(w, i);
+        ctx.stroke();
+    }
+
+    // Elementos
+    desenharFonteLuz();
+    const placa = desenharPlaca();
+    desenharColetor();
+
+    // Gerar fótons
+    contadorFotons++;
+    if (contadorFotons % Math.max(1, Math.floor(30 / estado.intensidade)) === 0) {
+        estado.fotons.push(criarFoton());
+    }
+
+    // Atualizar e desenhar fótons
+    estado.fotons.forEach(f => {
+        if (!f.vivo) return;
+        f.x += f.vx;
+
+        // Colisão com placa
+        if (f.x >= placa.x) {
+            f.vivo = false;
+            criarFaisca(placa.x, f.y, f.cor);
+
+            // Calcular se ejeta elétron
+            const energiaFoton = (estado.frequencia * 1e12 * H); // eV
+            if (energiaFoton > estado.funcaoTrabalho) {
+                const energiaCinetica = energiaFoton - estado.funcaoTrabalho;
+                estado.eletrons.push(criarEletron(
+                    placa.x + placa.largura + 5,
+                    f.y,
+                    energiaCinetica
+                ));
+            }
+        }
+
+        // Desenhar fóton (onda/partícula)
+        if (f.vivo) {
+            ctx.fillStyle = f.cor;
+            ctx.shadowColor = f.cor;
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(f.x, f.y, f.tamanho, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Rastro ondulatório
+            ctx.strokeStyle = f.cor;
+            ctx.lineWidth = 1.5;
+            ctx.globalAlpha = 0.4;
+            ctx.beginPath();
+            for (let i = 0; i < 20; i++) {
+                const px = f.x - i * 2;
+                const py = f.y + Math.sin((f.x - i * 2) * 0.3) * 3;
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+        }
+    });
+
+    // Atualizar e desenhar elétrons
+    estado.eletrons.forEach(e => {
+        if (!e.vivo) return;
+        e.x += e.vx;
+        e.y += e.vy;
+        e.vida--;
+        if (e.vida <= 0 || e.x > w) e.vivo = false;
+
+        ctx.fillStyle = '#00ffff';
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Símbolo "e⁻"
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('e⁻', e.x, e.y - 8);
+    });
+
+    // Atualizar faíscas
+    estado.faiscas.forEach(f => {
+        f.x += f.vx;
+        f.y += f.vy;
+        f.vida--;
+        if (f.vida <= 0) return;
+        ctx.fillStyle = f.cor;
+        ctx.globalAlpha = f.vida / 30;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    });
+
+    // Limpar arrays mortos
+    estado.fotons = estado.fotons.filter(f => f.vivo);
+    estado.eletrons = estado.eletrons.filter(e => e.vivo);
+    estado.faiscas = estado.faiscas.filter(f => f.vida > 0);
+
+    // Legenda
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.font = '11px Poppins, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Fótons →', 60, 20);
+    ctx.fillStyle = '#00ffff';
+    ctx.fillText('Elétrons ejetados →', w * 0.65, 20);
+
+    requestAnimationFrame(animar);
+}
+requestAnimationFrame(animar);
+
+/* =========================================================
+   CONTROLES DO SIMULADOR
+   ========================================================= */
+const freqSlider = document.getElementById('freqSlider');
+const intSlider = document.getElementById('intSlider');
+const materialSelect = document.getElementById('materialSelect');
+const freqValor = document.getElementById('freqValor');
+const intValor = document.getElementById('intValor');
+const energiaFotonEl = document.getElementById('energiaFoton');
+const funcaoTrabalhoEl = document.getElementById('funcaoTrabalho');
+const energiaCineticaEl = document.getElementById('energiaCinetica');
+const eletronsSegundoEl = document.getElementById('eletronsSegundo');
+const statusEmissao = document.getElementById('statusEmissao');
+
+function atualizarSimulador() {
+    estado.frequencia = parseFloat(freqSlider.value);
+    estado.intensidade = parseInt(intSlider.value);
+    estado.funcaoTrabalho = parseFloat(materialSelect.value);
+
+    const energiaFoton = estado.frequencia * 1e12 * H;
+    const ec = Math.max(0, energiaFoton - estado.funcaoTrabalho);
+    const emite = energiaFoton > estado.funcaoTrabalho;
+
+    freqValor.textContent = estado.frequencia + ' THz';
+    intValor.textContent = estado.intensidade;
+    energiaFotonEl.textContent = energiaFoton.toFixed(2) + ' eV';
+    funcaoTrabalhoEl.textContent = estado.funcaoTrabalho.toFixed(2) + ' eV';
+    energiaCineticaEl.textContent = ec.toFixed(2) + ' eV';
+    eletronsSegundoEl.textContent = emite ? estado.intensidade : '0';
+
+    freqSlider.setAttribute('aria-valuenow', estado.frequencia);
+
+    if (emite) {
+        statusEmissao.className = 'status-emissao ativo';
+        statusEmissao.innerHTML = '✅ Emissão de elétrons ATIVA — E<sub>c</sub> = ' + ec.toFixed(2) + ' eV';
+    } else {
+        statusEmissao.className = 'status-emissao inativo';
+        statusEmissao.innerHTML = '⚠️ Frequência abaixo do limite — sem emissão';
+    }
+}
+
+freqSlider.addEventListener('input', atualizarSimulador);
+intSlider.addEventListener('input', atualizarSimulador);
+materialSelect.addEventListener('change', atualizarSimulador);
+atualizarSimulador();
+
+/* =========================================================
+   NAVEGAÇÃO SUAVE COM DESTAQUE
+   ========================================================= */
+document.querySelectorAll('nav a').forEach(link => {
+    link.addEventListener('click', function(e) {
+        document.querySelectorAll('nav a').forEach(l => l.removeAttribute('aria-current'));
+        this.setAttribute('aria-current', 'page');
+    });
+});
+
+/* =========================================================
+   ANIMAÇÃO AO ROLAR (Intersection Observer)
+   ========================================================= */
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.card, .criterio-item, .comparativo-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+});
+
+/* =========================================================
+   ATALHOS DE TECLADO (acessibilidade)
+   ========================================================= */
+document.addEventListener('keydown', (e) => {
+    // Alt + 1 a 8 → pular para seções
+    if (e.altKey && /^[1-8]$/.test(e.key)) {
+        const secoes = ['inicio','efeito','simulador','piscina','robotica','programacao','libras','avaliacao'];
+        const idx = parseInt(e.key) - 1;
+        const el = document.getElementById(secoes[idx]);
+        if (el) {
+            e.preventDefault();
+            el.scrollIntoView({ behavior: 'smooth' });
+            el.focus({ preventScroll: true });
+        }
+    }
+    // Esc → fechar menu mobile
+    if (e.key === 'Escape' && menuPrincipal.classList.contains('aberto')) {
+        menuPrincipal.classList.remove('aberto');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.focus();
+    }
+});
+
+/* =========================================================
+   MENSAGEM DE BOAS-VINDAS NO CONSOLE
+   ========================================================= */
+console.log('%c🌞💧 Luz que Move', 'font-size: 24px; font-weight: bold; color: #ffd93d; text-shadow: 2px 2px #0a3d62;');
+console.log('%cSite educacional sobre o Efeito Fotoelétrico e a Piscina Solar', 'font-size: 14px; color: #3c9ee0;');
+console.log('%cAcessível • Responsivo • Interativo', 'font-size: 12px; color: #f77f00;');
+</script>
+
+<!-- VLibras widget (inicializado via JS acima) -->
+<div vw class="enabled">
+    <div vw-access-button class="active"></div>
+    <div vw-plugin-wrapper>
+        <div class="vw-plugin-top-wrapper"></div>
+    </div>
+</div>
+
+</body>
+</html>
